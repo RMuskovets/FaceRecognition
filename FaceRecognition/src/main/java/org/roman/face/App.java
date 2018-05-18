@@ -2,7 +2,7 @@ package org.roman.face;
 
 import org.openimaj.video.xuggle.XuggleVideo;
 import org.openimaj.video.capture.VideoCapture;
-import org.openimaj.video.Video;
+import org.openimaj.video.*;
 import org.openimaj.image.MBFImage;
 
 /**
@@ -11,10 +11,10 @@ import org.openimaj.image.MBFImage;
  */
 public class App {
 
-	private Video<MBFImage> video;
+	private VideoDisplay<MBFImage> video;
 
 	private App(Video<MBFImage> video) {
-		this.video = video;
+		this.video = VideoDisplay.createVideoDisplay(video);
 	}
 
 	public static App createWebcamCapture(VideoCapture capture) {
