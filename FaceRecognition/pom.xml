@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.roman.face</groupId>
   <artifactId>FaceRecognition</artifactId>
-  <version>0.1</version>
+  <version>1.0-RELEASE</version>
   <packaging>jar</packaging>
   <name>FaceRecognition</name>
   <url>http://www.openimaj.org</url>
