@@ -1,5 +1,6 @@
 package org.roman.face;
 
+import org.openimaj.image.FImage;
 import org.openimaj.image.MBFImage;
 import org.openimaj.image.colour.RGBColour;
 import org.openimaj.image.processing.face.detection.*;
@@ -14,11 +15,12 @@ import java.awt.*;
 import java.net.URL;
 import java.util.List;
 
+@SuppressWarnings("all")
 public class Faces<T extends DetectedFace> {
 
     private Video<MBFImage> video;
 
-    private FaceDetector<T, MBFImage> detector;
+    private FaceDetector<T, FImage> detector;
 
     private Color rect = Color.RED;
 
@@ -29,11 +31,11 @@ public class Faces<T extends DetectedFace> {
         video = v;
     }
 
-    public static Faces createWebcamCapture(VideoCapture capt) {
+    public static <T extends DetectedFace> Faces<T> createWebcamCapture(VideoCapture capt) {
         return new Faces(capt);
     }
 
-    public static Faces createFileCapture(URL url) {
+    public static <T extends DetectedFace> Faces<T> createFileCapture(URL url) {
         return new Faces(new XuggleVideo(url));
     }
 
@@ -41,11 +43,11 @@ public class Faces<T extends DetectedFace> {
         return video;
     }
 
-    public FaceDetector<T, MBFImage> getDetector() {
+    public FaceDetector<T, FImage> getDetector() {
         return detector;
     }
 
-    public void setDetector(FaceDetector<T, MBFImage> detector) {
+    public void setDetector(FaceDetector<T, FImage> detector) {
         this.detector = detector;
     }
 
@@ -57,7 +59,8 @@ public class Faces<T extends DetectedFace> {
             }
 
             public void beforeUpdate(MBFImage img) {
-                List<T> faces = detector.detectFaces(img);
+                img.getBand(0);
+                List<T> faces = null;
                 for (T face : faces) {
                     Rectangle rectFace = face.getBounds();
                     img.drawShape(rectFace, RGBColour.fromColor(rect));
