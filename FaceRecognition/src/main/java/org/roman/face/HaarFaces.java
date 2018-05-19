@@ -12,6 +12,8 @@ import org.openimaj.video.capture.VideoCapture;
 import java.awt.Color;
 import java.util.List;
 
+import static java.awt.Color.white;
+
 @SuppressWarnings("all") @RequiredArgsConstructor @Data
 public class HaarFaces<D extends DetectedFace> {
 
@@ -27,19 +29,24 @@ public class HaarFaces<D extends DetectedFace> {
             public void beforeUpdate(MBFImage y) {
                 List<D> faces = detector.detectFaces(Transforms.calculateIntensity(y));
                 for (DetectedFace face : faces) {
+                    Rectangle rectFace = face.getBounds();
+                    y.drawShape(rectFace, new Float[]{1f, 0f, 0f});
                     if (face instanceof KEDetectedFace) {
-                        KEDetectedFace keFace = (KEDetectedFace) face;
-                        for (FacialKeypoint point : keFace.getKeypoints()) {
-                            Rectangle pointRect = new Rectangle();
-                            pointRect.x = point.position.x;
-                            pointRect.y = point.position.y;
-                            pointRect.width = 1;
-                            pointRect.height = 1;
-                            y.drawShape(pointRect,
-                                    new Float[]{HaarFaces.this.point.getRed()/255F,HaarFaces.this.point.getGreen()/255F,HaarFaces.this.point.getBlue()/255F});
-                        }
+                        KEDetectedFace points = (KEDetectedFace) face;
+                        FacialKeypoint left_eye_left = points.getKeypoint(FacialKeypoint.FacialKeypointType.EYE_LEFT_LEFT);
+                        FacialKeypoint left_eye_right = points.getKeypoint(FacialKeypoint.FacialKeypointType.EYE_LEFT_RIGHT);
+                        float left_eye = DistanceBetween.getDistanceBetweenPoints(rectFace.x + left_eye_left.position.x,
+                                rectFace.y + left_eye_left.position.y,
+                                rectFace.x + left_eye_right.position.x,
+                                rectFace.y + left_eye_right.position.y);
+                        float left_eye_cm = DistanceBetween.toMetric(left_eye);
+                        y.drawShape(new Rectangle(
+                                rectFace.x + left_eye_left.position.x,
+                                rectFace.y + left_eye_left.position.y - DistanceBetween.fromMetric(left_eye, 0.75f),
+                                left_eye,
+                                DistanceBetween.fromMetric(left_eye, 1.5f)
+                        ), new Float[]{1f, 0f, 0f});
                     }
-                    y.drawShape(face.getBounds(), new Float[]{rect.getRed() / 255F, rect.getGreen() / 255F, rect.getBlue() / 255F});
                 }
             }
         });

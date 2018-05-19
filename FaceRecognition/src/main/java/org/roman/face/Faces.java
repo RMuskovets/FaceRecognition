@@ -7,6 +7,7 @@ import org.openimaj.image.processing.face.detection.*;
 import org.openimaj.image.processing.face.detection.keypoints.*;
 import org.openimaj.math.geometry.point.Point2dImpl;
 import org.openimaj.math.geometry.shape.Rectangle;
+import org.openimaj.math.geometry.shape.Shape;
 import org.openimaj.video.*;
 import org.openimaj.video.capture.VideoCapture;
 import org.openimaj.video.xuggle.XuggleVideo;
@@ -14,6 +15,8 @@ import org.openimaj.video.xuggle.XuggleVideo;
 import java.awt.*;
 import java.net.URL;
 import java.util.List;
+
+import static org.openimaj.image.processing.face.detection.keypoints.FacialKeypoint.*;
 
 @SuppressWarnings("all")
 public class Faces<T extends DetectedFace> {
@@ -51,6 +54,8 @@ public class Faces<T extends DetectedFace> {
         this.detector = detector;
     }
 
+    private static final Float[] white = {1f, 1f, 1f};
+
     public void install(VideoDisplay<MBFImage> display) {
         display.changeVideo(video);
         display.addVideoListener(new VideoDisplayListener<MBFImage>() {
@@ -63,13 +68,24 @@ public class Faces<T extends DetectedFace> {
                 List<T> faces = null;
                 for (T face : faces) {
                     Rectangle rectFace = face.getBounds();
+                    System.out.println(rectFace.x + " - " + rectFace.y);
+                    System.out.println(rectFace.width + ", " + rectFace.height);
                     img.drawShape(rectFace, RGBColour.fromColor(rect));
                     if (face instanceof KEDetectedFace) {
                         KEDetectedFace points = (KEDetectedFace) face;
-                        for (FacialKeypoint point : points.getKeypoints()) {
-                            Point2dImpl pos = point.position;
-                            img.drawShape(new Rectangle(pos.x, pos.y, sizePoint, sizePoint), RGBColour.fromColor(Faces.this.point));
-                        }
+                        FacialKeypoint left_eye_left = points.getKeypoint(FacialKeypointType.EYE_LEFT_LEFT);
+                        FacialKeypoint left_eye_right = points.getKeypoint(FacialKeypointType.EYE_LEFT_RIGHT);
+                        float left_eye = DistanceBetween.getDistanceBetweenPoints(rectFace.x + left_eye_left.position.x,
+                                rectFace.y + left_eye_left.position.y,
+                                rectFace.x + left_eye_right.position.x,
+                                rectFace.y + left_eye_right.position.y);
+                        float left_eye_cm = DistanceBetween.toMetric(left_eye);
+                        img.drawShape(new Rectangle(
+                                rectFace.x + left_eye_left.position.x,
+                                rectFace.y + left_eye_left.position.y - 1.5f,
+                                left_eye,
+                                3
+                        ), white);
                     }
                 }
             }
