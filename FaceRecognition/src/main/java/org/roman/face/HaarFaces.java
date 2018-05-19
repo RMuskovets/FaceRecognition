@@ -32,22 +32,34 @@ public class HaarFaces<D extends DetectedFace> {
                     Rectangle rectFace = face.getBounds();
                     y.drawShape(rectFace, new Float[]{1f, 0f, 0f});
                     if (face instanceof KEDetectedFace) {
-                        KEDetectedFace points = (KEDetectedFace) face;
-                        FacialKeypoint left_eye_left = points.getKeypoint(FacialKeypoint.FacialKeypointType.EYE_LEFT_LEFT);
-                        FacialKeypoint left_eye_right = points.getKeypoint(FacialKeypoint.FacialKeypointType.EYE_LEFT_RIGHT);
-                        float left_eye = DistanceBetween.getDistanceBetweenPoints(rectFace.x + left_eye_left.position.x,
-                                rectFace.y + left_eye_left.position.y,
-                                rectFace.x + left_eye_right.position.x,
-                                rectFace.y + left_eye_right.position.y);
-                        float left_eye_cm = DistanceBetween.toMetric(left_eye);
-                        y.drawShape(new Rectangle(
-                                rectFace.x + left_eye_left.position.x,
-                                rectFace.y + left_eye_left.position.y - DistanceBetween.fromMetric(left_eye, 0.75f),
-                                left_eye,
-                                DistanceBetween.fromMetric(left_eye, 1.5f)
-                        ), new Float[]{1f, 0f, 0f});
+                        FacialKeypoint.FacialKeypointType[] types = {
+                                FacialKeypoint.FacialKeypointType.EYE_LEFT_LEFT,
+                                FacialKeypoint.FacialKeypointType.EYE_LEFT_RIGHT
+                        };
+                        drawEyeBox(y, (KEDetectedFace) face, rectFace, types);
+                        types = new FacialKeypoint.FacialKeypointType[]{
+                                FacialKeypoint.FacialKeypointType.EYE_RIGHT_LEFT,
+                                FacialKeypoint.FacialKeypointType.EYE_RIGHT_RIGHT
+                        };
+                        drawEyeBox(y, (KEDetectedFace) face, rectFace, types);
                     }
                 }
+            }
+
+            public void drawEyeBox(MBFImage y, KEDetectedFace points, Rectangle rectFace, FacialKeypoint.FacialKeypointType[] types) {
+                FacialKeypoint left_eye_left = points.getKeypoint(types[0]);
+                FacialKeypoint left_eye_right = points.getKeypoint(types[1]);
+                float left_eye = DistanceBetween.getDistanceBetweenPoints(rectFace.x + left_eye_left.position.x,
+                        rectFace.y + left_eye_left.position.y,
+                        rectFace.x + left_eye_right.position.x,
+                        rectFace.y + left_eye_right.position.y);
+                float left_eye_cm = DistanceBetween.toMetric(left_eye);
+                y.drawShape(new Rectangle(
+                        rectFace.x + left_eye_left.position.x,
+                        rectFace.y + left_eye_left.position.y - DistanceBetween.fromMetric(left_eye, 0.75f),
+                        left_eye,
+                        DistanceBetween.fromMetric(left_eye, 1.5f)
+                ), new Float[]{1f, 0f, 0f});
             }
         });
     }
